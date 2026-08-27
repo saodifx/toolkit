@@ -1,0 +1,1538 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>故障记录系统</title>
+    <style>
+        /* ===== 主题变量 ===== */
+        :root {
+            --bg-body: #f5f5f5;
+            --bg-card: #ffffff;
+            --text-primary: #222222;
+            --text-secondary: #888888;
+            --border-color: #dddddd;
+            --border-dark: #222222;
+            --btn-bg: #222222;
+            --btn-text: #ffffff;
+            --btn-hover-bg: #ffffff;
+            --btn-hover-text: #222222;
+            --input-bg: #ffffff;
+            --input-border: #cccccc;
+            --table-border: #eeeeee;
+            --empty-color: #aaaaaa;
+            --tag-border: #dddddd;
+            --tag-color: #888888;
+            --delete-color: #c0392b;
+            --modal-overlay: rgba(0, 0, 0, 0.4);
+            --modal-bg: #ffffff;
+            --touch-size: 44px;
+        }
+
+        body.night-mode {
+            --bg-body: #1a1a1a;
+            --bg-card: #2a2a2a;
+            --text-primary: #e8e8e8;
+            --text-secondary: #999999;
+            --border-color: #444444;
+            --border-dark: #666666;
+            --btn-bg: #e8e8e8;
+            --btn-text: #1a1a1a;
+            --btn-hover-bg: #1a1a1a;
+            --btn-hover-text: #e8e8e8;
+            --input-bg: #333333;
+            --input-border: #555555;
+            --table-border: #3a3a3a;
+            --empty-color: #666666;
+            --tag-border: #555555;
+            --tag-color: #999999;
+            --delete-color: #e74c3c;
+            --modal-overlay: rgba(0, 0, 0, 0.7);
+            --modal-bg: #2a2a2a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, "Microsoft YaHei", "PingFang SC", sans-serif;
+            background: var(--bg-body);
+            color: var(--text-primary);
+            padding: 12px;
+            max-width: 600px;
+            margin: 0 auto;
+            transition: background 0.3s, color 0.3s;
+            padding-bottom: 80px;
+        }
+
+        h1 {
+            font-size: 22px;
+            font-weight: 300;
+            letter-spacing: 2px;
+            border-bottom: 2px solid var(--border-dark);
+            padding-bottom: 10px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 14px 16px;
+            margin-bottom: 14px;
+            transition: background 0.3s, border-color 0.3s;
+            border-radius: 6px;
+        }
+
+        .card-title {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: end;
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 100%;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 3px;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--input-border);
+            background: var(--input-bg);
+            font-size: 16px;
+            color: var(--text-primary);
+            border-radius: 6px;
+            outline: none;
+            transition: 0.2s;
+            min-height: var(--touch-size);
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: var(--border-dark);
+        }
+
+        .form-group input[type="date"],
+        .form-group input[type="time"] {
+            padding: 10px 12px;
+            min-height: var(--touch-size);
+        }
+
+        body.night-mode input[type="date"]::-webkit-calendar-picker-indicator,
+        body.night-mode input[type="time"]::-webkit-calendar-picker-indicator {
+            filter: invert(0.7);
+        }
+
+        body.night-mode select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M0 0l6 8 6-8z' fill='%23999'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 12px 8px;
+            padding-right: 36px;
+        }
+
+        .btn {
+            padding: 10px 24px;
+            border: 1px solid var(--btn-bg);
+            background: var(--btn-bg);
+            color: var(--btn-text);
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: 0.25s;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            min-height: var(--touch-size);
+            min-width: 60px;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .btn:active {
+            transform: scale(0.96);
+        }
+
+        .btn:hover {
+            background: var(--btn-hover-bg);
+            color: var(--btn-hover-text);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text-primary);
+            border-color: var(--border-color);
+        }
+
+        .btn-outline:hover {
+            background: var(--btn-bg);
+            color: var(--btn-text);
+            border-color: var(--btn-bg);
+        }
+
+        .btn-sm {
+            padding: 6px 14px;
+            font-size: 13px;
+            min-height: 34px;
+        }
+
+        .btn-block {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .btn-success {
+            border-color: #27ae60;
+            background: #27ae60;
+            color: #fff;
+        }
+
+        .btn-success:hover {
+            background: transparent;
+            color: #27ae60;
+        }
+
+        .btn-danger {
+            border-color: var(--delete-color);
+            background: var(--delete-color);
+            color: #fff;
+        }
+
+        .btn-danger:hover {
+            background: transparent;
+            color: var(--delete-color);
+        }
+
+        .btn-warning {
+            border-color: #f39c12;
+            background: #f39c12;
+            color: #fff;
+        }
+
+        .btn-warning:hover {
+            background: transparent;
+            color: #f39c12;
+        }
+
+        .datetime-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .datetime-group .form-group {
+            min-width: 0;
+        }
+
+        .datetime-group .form-group:first-child {
+            flex: 2;
+        }
+
+        .datetime-group .form-group:last-child {
+            flex: 1;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        th {
+            text-align: left;
+            padding: 8px 4px;
+            border-bottom: 2px solid var(--border-dark);
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        td {
+            padding: 8px 4px;
+            border-bottom: 1px solid var(--table-border);
+            vertical-align: middle;
+            font-size: 13px;
+            word-break: break-word;
+        }
+
+        .empty {
+            text-align: center;
+            color: var(--empty-color);
+            padding: 30px 0;
+            font-size: 14px;
+        }
+
+        .summary {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .summary-item {
+            flex: 1;
+            min-width: 80px;
+            background: var(--bg-body);
+            padding: 8px 12px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .summary-item .num {
+            font-size: 20px;
+            font-weight: 600;
+            display: block;
+        }
+
+        .summary-item .label {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .tag {
+            display: inline-block;
+            font-size: 11px;
+            color: var(--tag-color);
+            border: 1px solid var(--tag-border);
+            padding: 2px 10px;
+            border-radius: 12px;
+            white-space: nowrap;
+        }
+
+        .delete-btn {
+            color: var(--delete-color);
+            cursor: pointer;
+            font-size: 20px;
+            border: none;
+            background: none;
+            padding: 4px 8px;
+            min-height: 36px;
+            min-width: 36px;
+            touch-action: manipulation;
+        }
+
+        .delete-btn:active {
+            opacity: 0.4;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-row input,
+        .filter-row select {
+            padding: 8px 10px;
+            border: 1px solid var(--input-border);
+            background: var(--input-bg);
+            font-size: 14px;
+            color: var(--text-primary);
+            border-radius: 6px;
+            outline: none;
+            min-height: 40px;
+            flex: 1;
+            min-width: 80px;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .filter-row input:focus,
+        .filter-row select:focus {
+            border-color: var(--border-dark);
+        }
+
+        .filter-row .btn {
+            flex: 0 0 auto;
+        }
+
+        .hint {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 6px;
+        }
+
+        .backup-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 6px;
+        }
+
+        .backup-row .btn {
+            flex: 1;
+            min-width: 80px;
+        }
+
+        /* ===== 弹窗 ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--modal-overlay);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 16px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--modal-bg);
+            border: 1px solid var(--border-color);
+            padding: 20px 22px;
+            max-width: 440px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            border-radius: 10px;
+        }
+
+        .modal h2 {
+            font-size: 18px;
+            font-weight: 300;
+            letter-spacing: 1px;
+            margin-bottom: 14px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .modal .form-group {
+            margin-bottom: 8px;
+        }
+
+        .modal .row-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 14px;
+            flex-wrap: wrap;
+        }
+
+        .item-list {
+            max-height: 200px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .item-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--table-border);
+        }
+
+        .item-row .name {
+            flex: 1;
+            font-weight: 500;
+            font-size: 15px;
+        }
+
+        .item-row .actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        .item-row .actions button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            color: var(--text-secondary);
+            padding: 4px 8px;
+            min-height: 36px;
+            min-width: 36px;
+            touch-action: manipulation;
+        }
+
+        .item-row .actions button:active {
+            opacity: 0.4;
+        }
+
+        .item-row .actions button:hover {
+            color: var(--text-primary);
+        }
+
+        .item-row .actions .del:hover {
+            color: var(--delete-color);
+        }
+
+        .modal-add-row {
+            display: flex;
+            gap: 8px;
+            align-items: end;
+        }
+
+        .modal-add-row .form-group {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .modal-add-row .form-group:last-child {
+            flex: 0 0 auto;
+            min-width: 60px;
+        }
+
+        #faultList {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* 隐藏的文件输入 */
+        #fileInput {
+            display: none;
+        }
+
+        /* ===== 响应式 ===== */
+        @media (max-width: 480px) {
+            body {
+                padding: 8px;
+                padding-bottom: 60px;
+            }
+            .card {
+                padding: 12px 14px;
+                margin-bottom: 10px;
+            }
+            h1 {
+                font-size: 19px;
+                padding-bottom: 8px;
+                margin-bottom: 12px;
+            }
+            .summary {
+                gap: 8px;
+            }
+            .summary-item {
+                padding: 6px 10px;
+                min-width: 60px;
+            }
+            .summary-item .num {
+                font-size: 17px;
+            }
+            .datetime-group {
+                flex-direction: row;
+            }
+            .datetime-group .form-group {
+                min-width: 0;
+            }
+            .datetime-group .form-group:first-child {
+                flex: 2;
+            }
+            .datetime-group .form-group:last-child {
+                flex: 1;
+            }
+            .filter-row input,
+            .filter-row select {
+                font-size: 14px;
+                min-height: 36px;
+            }
+            .btn {
+                font-size: 15px;
+                padding: 8px 16px;
+                min-height: 38px;
+            }
+            .btn-sm {
+                font-size: 12px;
+                padding: 4px 10px;
+                min-height: 30px;
+            }
+            table {
+                font-size: 12px;
+            }
+            td,
+            th {
+                padding: 6px 3px;
+            }
+            .modal {
+                padding: 16px;
+            }
+            .modal h2 {
+                font-size: 17px;
+            }
+            .item-row {
+                padding: 8px 0;
+            }
+            .item-row .name {
+                font-size: 14px;
+            }
+            .item-row .actions button {
+                font-size: 16px;
+                min-height: 32px;
+                min-width: 32px;
+            }
+            .modal-add-row {
+                flex-wrap: wrap;
+            }
+            .modal-add-row .form-group {
+                min-width: 100%;
+            }
+            .modal-add-row .form-group:last-child {
+                min-width: 100%;
+            }
+            .backup-row .btn {
+                min-width: 60px;
+                font-size: 13px;
+                padding: 6px 12px;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .datetime-group {
+                flex-direction: column;
+                gap: 6px;
+            }
+            .datetime-group .form-group {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>
+        🔧 故障记录
+        <span class="header-actions">
+            <button class="btn btn-outline btn-sm" id="manageDeviceBtn">📟 设备</button>
+            <button class="btn btn-outline btn-sm" id="manageAlarmBtn">🚨 报警</button>
+        </span>
+    </h1>
+
+    <!-- ===== 统计 ===== -->
+    <div class="card">
+        <div class="card-title">📊 统计</div>
+        <div class="summary" id="faultSummary">
+            <div class="summary-item">
+                <span class="num" id="totalCount">0</span>
+                <span class="label">总故障</span>
+            </div>
+            <div class="summary-item">
+                <span class="num" id="totalDuration">0</span>
+                <span class="label">总处理(分钟)</span>
+            </div>
+            <div class="summary-item">
+                <span class="num" id="avgDuration">0</span>
+                <span class="label">平均(分钟)</span>
+            </div>
+            <div class="summary-item">
+                <span class="num" id="deviceCount">0</span>
+                <span class="label">设备数</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== 添加记录 ===== -->
+    <div class="card">
+        <div class="card-title">✏️ 记录故障</div>
+
+        <div class="datetime-group">
+            <div class="form-group">
+                <label>📅 日期</label>
+                <input type="date" id="faultDate">
+            </div>
+            <div class="form-group">
+                <label>🕐 时间</label>
+                <input type="time" id="faultTime" step="60">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="form-group">
+                <label>设备</label>
+                <select id="faultDevice"></select>
+            </div>
+            <div class="form-group">
+                <label>报警种类</label>
+                <select id="faultAlarm"></select>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="form-group" style="flex:1;">
+                <label>处理时间 (分钟)</label>
+                <input type="number" id="faultDuration" placeholder="0" step="1" min="0" inputmode="numeric">
+            </div>
+            <div class="form-group" style="flex:2;">
+                <label>备注</label>
+                <input type="text" id="faultNote" placeholder="备注...">
+            </div>
+        </div>
+
+        <button class="btn btn-block" id="addBtn">➕ 添加记录</button>
+        <div class="hint">💡 设备/报警可在右上角自由管理</div>
+    </div>
+
+    <!-- ===== 筛选 & 导出 & 备份 ===== -->
+    <div class="card">
+        <div class="card-title">🔍 筛选 &amp; 导出</div>
+        <div class="filter-row">
+            <input type="date" id="filterDate">
+            <select id="filterDevice">
+                <option value="全部">全部设备</option>
+            </select>
+            <select id="filterAlarm">
+                <option value="全部">全部报警</option>
+            </select>
+            <button class="btn btn-outline btn-sm" id="filterBtn">筛选</button>
+            <button class="btn btn-outline btn-sm" id="resetFilterBtn">重置</button>
+            <button class="btn btn-success btn-sm" id="exportBtn">📥 导出报表</button>
+        </div>
+        <div class="backup-row">
+            <button class="btn btn-warning btn-sm" id="backupBtn">💾 备份数据</button>
+            <button class="btn btn-outline btn-sm" id="restoreBtn">📂 恢复数据</button>
+            <input type="file" id="fileInput" accept=".json">
+        </div>
+        <div class="hint" id="backupHint">💡 备份数据可保存到手机，换设备或清缓存后可恢复</div>
+    </div>
+
+    <!-- ===== 记录列表 ===== -->
+    <div class="card">
+        <div class="card-title">📋 故障记录</div>
+        <div id="faultList">
+            <div class="empty">还没有故障记录</div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- ===== 弹窗：管理设备 ===== -->
+    <!-- ============================================================ -->
+    <div class="modal-overlay" id="deviceModal">
+        <div class="modal">
+            <h2>📟 管理设备</h2>
+            <div id="deviceList" class="item-list"></div>
+            <div style="margin-top:14px;border-top:1px solid var(--border-color);padding-top:14px;">
+                <div class="modal-add-row">
+                    <div class="form-group">
+                        <label>设备名称</label>
+                        <input type="text" id="newDeviceName" placeholder="如：压缩机">
+                    </div>
+                    <div class="form-group">
+                        <button class="btn" id="addDeviceBtn" style="width:100%;">添加</button>
+                    </div>
+                </div>
+            </div>
+            <div class="row-actions">
+                <button class="btn btn-outline btn-block" id="closeDeviceModal">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- ===== 弹窗：管理报警种类 ===== -->
+    <!-- ============================================================ -->
+    <div class="modal-overlay" id="alarmModal">
+        <div class="modal">
+            <h2>🚨 管理报警</h2>
+            <div id="alarmList" class="item-list"></div>
+            <div style="margin-top:14px;border-top:1px solid var(--border-color);padding-top:14px;">
+                <div class="modal-add-row">
+                    <div class="form-group">
+                        <label>报警种类</label>
+                        <input type="text" id="newAlarmName" placeholder="如：过温报警">
+                    </div>
+                    <div class="form-group">
+                        <button class="btn" id="addAlarmBtn" style="width:100%;">添加</button>
+                    </div>
+                </div>
+            </div>
+            <div class="row-actions">
+                <button class="btn btn-outline btn-block" id="closeAlarmModal">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- ===== JavaScript ===== -->
+    <!-- ============================================================ -->
+    <script>
+        // ============================================================
+        //  主题切换
+        // ============================================================
+        function applyTheme() {
+            const hour = new Date().getHours();
+            if (hour >= 18 || hour < 6) {
+                document.body.classList.add('night-mode');
+            } else {
+                document.body.classList.remove('night-mode');
+            }
+        }
+        applyTheme();
+
+        // ============================================================
+        //  工具函数
+        // ============================================================
+        function genId() {
+            return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+        }
+
+        function getData(key) {
+            try {
+                const val = localStorage.getItem(key);
+                if (val === null) return [];
+                return JSON.parse(val);
+            } catch {
+                return [];
+            }
+        }
+
+        function setData(key, val) {
+            localStorage.setItem(key, JSON.stringify(val));
+        }
+
+        // ============================================================
+        //  初始化默认数据
+        // ============================================================
+        function initDefaultData() {
+            if (!localStorage.getItem('fault_devices')) {
+                setData('fault_devices', ['压缩机', '水泵', '风机', '电机', '其他']);
+            }
+            if (!localStorage.getItem('fault_alarms')) {
+                setData('fault_alarms', ['过温报警', '过压报警', '欠压报警', '过流报警', '通信故障', '其他']);
+            }
+            if (!localStorage.getItem('fault_records') || getData('fault_records').length === 0) {
+                const now = new Date();
+                const ymd = now.toISOString().slice(0, 10);
+                const hh = String(now.getHours()).padStart(2, '0');
+                const mm = String(now.getMinutes()).padStart(2, '0');
+                const hh2 = String(now.getHours() - 1).padStart(2, '0');
+                // 只在完全没有数据时添加示例数据
+                if (!localStorage.getItem('fault_records')) {
+                    setData('fault_records', [{
+                        id: genId(),
+                        date: ymd,
+                        time: hh + ':' + mm,
+                        device: '压缩机',
+                        alarm: '过温报警',
+                        duration: 15,
+                        note: '更换散热片'
+                    }, {
+                        id: genId(),
+                        date: ymd,
+                        time: hh2 + ':' + mm,
+                        device: '水泵',
+                        alarm: '过流报警',
+                        duration: 8,
+                        note: '清理叶轮'
+                    }]);
+                }
+            }
+        }
+        initDefaultData();
+
+        // ============================================================
+        //  获取数据
+        // ============================================================
+        function getDevices() { return getData('fault_devices'); }
+
+        function setDevices(v) { setData('fault_devices', v); }
+
+        function getAlarms() { return getData('fault_alarms'); }
+
+        function setAlarms(v) { setData('fault_alarms', v); }
+
+        function getRecords() { return getData('fault_records'); }
+
+        function setRecords(v) { setData('fault_records', v); }
+
+        // ============================================================
+        //  渲染下拉框
+        // ============================================================
+        function renderSelects() {
+            const devices = getDevices();
+            const selDevice = document.getElementById('faultDevice');
+            const oldDevice = selDevice.value;
+            selDevice.innerHTML = '';
+            devices.forEach(d => {
+                const o = document.createElement('option');
+                o.value = d;
+                o.textContent = d;
+                selDevice.appendChild(o);
+            });
+            if (devices.includes(oldDevice)) selDevice.value = oldDevice;
+            else if (devices.length > 0) selDevice.value = devices[0];
+
+            const alarms = getAlarms();
+            const selAlarm = document.getElementById('faultAlarm');
+            const oldAlarm = selAlarm.value;
+            selAlarm.innerHTML = '';
+            alarms.forEach(a => {
+                const o = document.createElement('option');
+                o.value = a;
+                o.textContent = a;
+                selAlarm.appendChild(o);
+            });
+            if (alarms.includes(oldAlarm)) selAlarm.value = oldAlarm;
+            else if (alarms.length > 0) selAlarm.value = alarms[0];
+
+            renderFilterSelects();
+        }
+
+        function renderFilterSelects() {
+            const devices = getDevices();
+            const alarms = getAlarms();
+
+            const fd = document.getElementById('filterDevice');
+            const oldFd = fd.value;
+            fd.innerHTML = '<option value="全部">全部设备</option>';
+            devices.forEach(d => {
+                const o = document.createElement('option');
+                o.value = d;
+                o.textContent = d;
+                fd.appendChild(o);
+            });
+            if (devices.includes(oldFd)) fd.value = oldFd;
+
+            const fa = document.getElementById('filterAlarm');
+            const oldFa = fa.value;
+            fa.innerHTML = '<option value="全部">全部报警</option>';
+            alarms.forEach(a => {
+                const o = document.createElement('option');
+                o.value = a;
+                o.textContent = a;
+                fa.appendChild(o);
+            });
+            if (alarms.includes(oldFa)) fa.value = oldFa;
+        }
+
+        // ============================================================
+        //  渲染设备管理弹窗
+        // ============================================================
+        let editingDevice = null;
+
+        function renderDeviceManager() {
+            const cont = document.getElementById('deviceList');
+            const devices = getDevices();
+            if (!devices.length) {
+                cont.innerHTML = '<div class="empty">暂无设备，请添加</div>';
+                return;
+            }
+            let html = '';
+            devices.forEach(d => {
+                html += `
+                        <div class="item-row">
+                            <span class="name">${d}</span>
+                            <span class="actions">
+                                <button class="edit-device-btn" data-name="${d}">✏️</button>
+                                <button class="del del-device-btn" data-name="${d}">✕</button>
+                            </span>
+                        </div>
+                    `;
+            });
+            cont.innerHTML = html;
+
+            cont.querySelectorAll('.del-device-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const name = this.dataset.name;
+                    if (!confirm(`删除设备「${name}」？\n（该设备的所有故障记录也会被删除）`)) return;
+                    let list = getDevices().filter(d => d !== name);
+                    setDevices(list);
+                    let recs = getRecords().filter(r => r.device !== name);
+                    setRecords(recs);
+                    renderDeviceManager();
+                    renderSelects();
+                    renderRecords();
+                });
+            });
+
+            cont.querySelectorAll('.edit-device-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const name = this.dataset.name;
+                    const input = document.getElementById('newDeviceName');
+                    input.value = name;
+                    editingDevice = name;
+                    input.focus();
+                    input.select();
+                    document.getElementById('addDeviceBtn').textContent = '更新';
+                });
+            });
+        }
+
+        // ============================================================
+        //  渲染报警管理弹窗
+        // ============================================================
+        let editingAlarm = null;
+
+        function renderAlarmManager() {
+            const cont = document.getElementById('alarmList');
+            const alarms = getAlarms();
+            if (!alarms.length) {
+                cont.innerHTML = '<div class="empty">暂无报警种类，请添加</div>';
+                return;
+            }
+            let html = '';
+            alarms.forEach(a => {
+                html += `
+                        <div class="item-row">
+                            <span class="name">${a}</span>
+                            <span class="actions">
+                                <button class="edit-alarm-btn" data-name="${a}">✏️</button>
+                                <button class="del del-alarm-btn" data-name="${a}">✕</button>
+                            </span>
+                        </div>
+                    `;
+            });
+            cont.innerHTML = html;
+
+            cont.querySelectorAll('.del-alarm-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const name = this.dataset.name;
+                    if (!confirm(`删除报警种类「${name}」？\n（该报警的所有故障记录也会被删除）`)) return;
+                    let list = getAlarms().filter(a => a !== name);
+                    setAlarms(list);
+                    let recs = getRecords().filter(r => r.alarm !== name);
+                    setRecords(recs);
+                    renderAlarmManager();
+                    renderSelects();
+                    renderRecords();
+                });
+            });
+
+            cont.querySelectorAll('.edit-alarm-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const name = this.dataset.name;
+                    const input = document.getElementById('newAlarmName');
+                    input.value = name;
+                    editingAlarm = name;
+                    input.focus();
+                    input.select();
+                    document.getElementById('addAlarmBtn').textContent = '更新';
+                });
+            });
+        }
+
+        // ============================================================
+        //  添加设备（支持更新）
+        // ============================================================
+        document.getElementById('addDeviceBtn').addEventListener('click', function() {
+            const input = document.getElementById('newDeviceName');
+            const name = input.value.trim();
+            if (!name) { alert('请输入设备名称'); return; }
+
+            let list = getDevices();
+
+            if (editingDevice) {
+                if (editingDevice === name) {
+                    editingDevice = null;
+                    this.textContent = '添加';
+                    input.value = '';
+                    renderDeviceManager();
+                    return;
+                }
+                if (list.includes(name) && name !== editingDevice) {
+                    alert('设备「' + name + '」已存在');
+                    return;
+                }
+                list = list.filter(d => d !== editingDevice);
+                list.push(name);
+                setDevices(list);
+                let recs = getRecords().map(r => {
+                    if (r.device === editingDevice) r.device = name;
+                    return r;
+                });
+                setRecords(recs);
+                editingDevice = null;
+                this.textContent = '添加';
+                input.value = '';
+                renderDeviceManager();
+                renderSelects();
+                renderRecords();
+                return;
+            }
+
+            if (list.includes(name)) { alert('设备「' + name + '」已存在'); return; }
+            list.push(name);
+            setDevices(list);
+            input.value = '';
+            renderDeviceManager();
+            renderSelects();
+        });
+
+        // ============================================================
+        //  添加报警（支持更新）
+        // ============================================================
+        document.getElementById('addAlarmBtn').addEventListener('click', function() {
+            const input = document.getElementById('newAlarmName');
+            const name = input.value.trim();
+            if (!name) { alert('请输入报警种类'); return; }
+
+            let list = getAlarms();
+
+            if (editingAlarm) {
+                if (editingAlarm === name) {
+                    editingAlarm = null;
+                    this.textContent = '添加';
+                    input.value = '';
+                    renderAlarmManager();
+                    return;
+                }
+                if (list.includes(name) && name !== editingAlarm) {
+                    alert('报警种类「' + name + '」已存在');
+                    return;
+                }
+                list = list.filter(a => a !== editingAlarm);
+                list.push(name);
+                setAlarms(list);
+                let recs = getRecords().map(r => {
+                    if (r.alarm === editingAlarm) r.alarm = name;
+                    return r;
+                });
+                setRecords(recs);
+                editingAlarm = null;
+                this.textContent = '添加';
+                input.value = '';
+                renderAlarmManager();
+                renderSelects();
+                renderRecords();
+                return;
+            }
+
+            if (list.includes(name)) { alert('报警种类「' + name + '」已存在'); return; }
+            list.push(name);
+            setAlarms(list);
+            input.value = '';
+            renderAlarmManager();
+            renderSelects();
+        });
+
+        // ============================================================
+        //  回车添加 / 取消编辑
+        // ============================================================
+        document.getElementById('newDeviceName').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('addDeviceBtn').click();
+            }
+            if (e.key === 'Escape') {
+                if (editingDevice) {
+                    editingDevice = null;
+                    document.getElementById('addDeviceBtn').textContent = '添加';
+                    this.value = '';
+                    renderDeviceManager();
+                }
+            }
+        });
+
+        document.getElementById('newAlarmName').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('addAlarmBtn').click();
+            }
+            if (e.key === 'Escape') {
+                if (editingAlarm) {
+                    editingAlarm = null;
+                    document.getElementById('addAlarmBtn').textContent = '添加';
+                    this.value = '';
+                    renderAlarmManager();
+                }
+            }
+        });
+
+        // ============================================================
+        //  弹窗开关（关闭时重置编辑状态）
+        // ============================================================
+        function resetDeviceModal() {
+            editingDevice = null;
+            document.getElementById('newDeviceName').value = '';
+            document.getElementById('addDeviceBtn').textContent = '添加';
+        }
+
+        function resetAlarmModal() {
+            editingAlarm = null;
+            document.getElementById('newAlarmName').value = '';
+            document.getElementById('addAlarmBtn').textContent = '添加';
+        }
+
+        document.getElementById('manageDeviceBtn').addEventListener('click', function() {
+            resetDeviceModal();
+            document.getElementById('deviceModal').classList.add('active');
+            renderDeviceManager();
+        });
+        document.getElementById('closeDeviceModal').addEventListener('click', function() {
+            resetDeviceModal();
+            document.getElementById('deviceModal').classList.remove('active');
+        });
+        document.getElementById('deviceModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                resetDeviceModal();
+                this.classList.remove('active');
+            }
+        });
+
+        document.getElementById('manageAlarmBtn').addEventListener('click', function() {
+            resetAlarmModal();
+            document.getElementById('alarmModal').classList.add('active');
+            renderAlarmManager();
+        });
+        document.getElementById('closeAlarmModal').addEventListener('click', function() {
+            resetAlarmModal();
+            document.getElementById('alarmModal').classList.remove('active');
+        });
+        document.getElementById('alarmModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                resetAlarmModal();
+                this.classList.remove('active');
+            }
+        });
+
+        // ============================================================
+        //  设置默认日期时间
+        // ============================================================
+        function setDefaultDatetime() {
+            const now = new Date();
+            const ymd = now.toISOString().slice(0, 10);
+            const hh = String(now.getHours()).padStart(2, '0');
+            const mm = String(now.getMinutes()).padStart(2, '0');
+
+            const dateInput = document.getElementById('faultDate');
+            const timeInput = document.getElementById('faultTime');
+            if (!dateInput.value) dateInput.value = ymd;
+            if (!timeInput.value) timeInput.value = hh + ':' + mm;
+        }
+        setDefaultDatetime();
+
+        // ============================================================
+        //  核心：添加记录
+        // ============================================================
+        document.getElementById('addBtn').addEventListener('click', function() {
+            const date = document.getElementById('faultDate').value;
+            const time = document.getElementById('faultTime').value;
+            const device = document.getElementById('faultDevice').value;
+            const alarm = document.getElementById('faultAlarm').value;
+            const duration = parseInt(document.getElementById('faultDuration').value);
+            const note = document.getElementById('faultNote').value.trim();
+
+            if (!date) { alert('请选择日期'); return; }
+            if (!time) { alert('请选择时间'); return; }
+            if (!device) { alert('请选择设备'); return; }
+            if (!alarm) { alert('请选择报警种类'); return; }
+            if (isNaN(duration) || duration < 0) { alert('请输入有效的处理时间（分钟）'); return; }
+
+            const records = getRecords();
+            records.push({
+                id: genId(),
+                date: date,
+                time: time,
+                device: device,
+                alarm: alarm,
+                duration: duration,
+                note: note
+            });
+            setRecords(records);
+
+            document.getElementById('faultDuration').value = '';
+            document.getElementById('faultNote').value = '';
+            renderRecords();
+            // 显示保存成功提示
+            showToast('✅ 已保存');
+        });
+
+        document.getElementById('faultNote').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('addBtn').click();
+            }
+        });
+
+        // ============================================================
+        //  Toast 提示（手机端友好）
+        // ============================================================
+        function showToast(msg) {
+            let toast = document.getElementById('toast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'toast';
+                toast.style.cssText = `
+                        position: fixed;
+                        bottom: 30px;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        background: rgba(0,0,0,0.75);
+                        color: #fff;
+                        padding: 10px 24px;
+                        border-radius: 8px;
+                        font-size: 15px;
+                        z-index: 9999;
+                        opacity: 0;
+                        transition: opacity 0.3s;
+                        pointer-events: none;
+                        max-width: 90%;
+                        text-align: center;
+                    `;
+                document.body.appendChild(toast);
+            }
+            toast.textContent = msg;
+            toast.style.opacity = '1';
+            clearTimeout(toast._timer);
+            toast._timer = setTimeout(() => {
+                toast.style.opacity = '0';
+            }, 1500);
+        }
+
+        // ============================================================
+        //  筛选 & 渲染
+        // ============================================================
+        function renderRecords() {
+            const records = getRecords();
+            const filterDate = document.getElementById('filterDate').value;
+            const filterDevice = document.getElementById('filterDevice').value;
+            const filterAlarm = document.getElementById('filterAlarm').value;
+
+            let filtered = records;
+            if (filterDate) {
+                filtered = filtered.filter(r => r.date === filterDate);
+            }
+            if (filterDevice !== '全部') {
+                filtered = filtered.filter(r => r.device === filterDevice);
+            }
+            if (filterAlarm !== '全部') {
+                filtered = filtered.filter(r => r.alarm === filterAlarm);
+            }
+            filtered.sort((a, b) => (a.date + a.time < b.date + b.time ? -1 : 1));
+
+            // 统计
+            const total = records.length;
+            const totalDur = records.reduce((s, r) => s + r.duration, 0);
+            const avgDur = total > 0 ? (totalDur / total) : 0;
+            const deviceSet = new Set(records.map(r => r.device));
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('totalDuration').textContent = totalDur;
+            document.getElementById('avgDuration').textContent = avgDur.toFixed(1);
+            document.getElementById('deviceCount').textContent = deviceSet.size;
+
+            // 列表
+            const cont = document.getElementById('faultList');
+            if (!filtered.length) {
+                cont.innerHTML = `<div class="empty">${records.length ? '没有匹配的记录' : '还没有故障记录'}</div>`;
+                return;
+            }
+
+            let html = `<table>
+                    <thead><tr>
+                        <th>日期</th><th>时间</th>
+                        <th>设备</th><th>报警</th>
+                        <th style="text-align:center;">处理(分钟)</th>
+                        <th>备注</th>
+                        <th style="width:40px;"></th>
+                    </tr></thead><tbody>`;
+            filtered.forEach(r => {
+                html += `<tr>
+                        <td>${r.date}</td>
+                        <td>${r.time}</td>
+                        <td><span class="tag">${r.device}</span></td>
+                        <td><span class="tag">${r.alarm}</span></td>
+                        <td style="text-align:center;">${r.duration}</td>
+                        <td>${r.note || ''}</td>
+                        <td><button class="delete-btn" data-id="${r.id}">✕</button></td>
+                    </tr>`;
+            });
+            html += '</tbody></table>';
+            cont.innerHTML = html;
+
+            cont.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    if (!confirm('确定删除这条记录吗？')) return;
+                    let recs = getRecords().filter(r => r.id !== this.dataset.id);
+                    setRecords(recs);
+                    renderRecords();
+                    showToast('🗑️ 已删除');
+                });
+            });
+        }
+
+        document.getElementById('filterBtn').addEventListener('click', renderRecords);
+        document.getElementById('resetFilterBtn').addEventListener('click', function() {
+            document.getElementById('filterDate').value = '';
+            document.getElementById('filterDevice').value = '全部';
+            document.getElementById('filterAlarm').value = '全部';
+            renderRecords();
+        });
+
+        // ============================================================
+        //  备份数据（导出 JSON 文件）
+        // ============================================================
+        document.getElementById('backupBtn').addEventListener('click', function() {
+            const data = {
+                version: '1.0',
+                exportTime: new Date().toISOString(),
+                devices: getDevices(),
+                alarms: getAlarms(),
+                records: getRecords()
+            };
+
+            const json = JSON.stringify(data, null, 2);
+            const blob = new Blob([json], { type: 'application/json;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            const today = new Date().toISOString().slice(0, 10);
+            link.download = `故障数据备份_${today}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
+            showToast('💾 备份已下载');
+        });
+
+        // ============================================================
+        //  恢复数据（导入 JSON 文件）
+        // ============================================================
+        document.getElementById('restoreBtn').addEventListener('click', function() {
+            document.getElementById('fileInput').click();
+        });
+
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = this.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                try {
+                    const data = JSON.parse(ev.target.result);
+                    if (!data.devices || !data.alarms || !data.records) {
+                        alert('❌ 无效的备份文件，请检查');
+                        return;
+                    }
+
+                    // 确认恢复
+                    if (!confirm(`⚠️ 将要恢复 ${data.records.length} 条记录、${data.devices.length} 个设备、${data.alarms.length} 种报警。\n\n当前数据将被覆盖，确定继续吗？`)) {
+                        return;
+                    }
+
+                    setDevices(data.devices);
+                    setAlarms(data.alarms);
+                    setRecords(data.records);
+
+                    renderSelects();
+                    renderRecords();
+                    showToast('✅ 数据恢复成功！');
+
+                    // 清空文件选择
+                    document.getElementById('fileInput').value = '';
+
+                } catch (err) {
+                    alert('❌ 解析失败：' + err.message);
+                }
+            };
+            reader.readAsText(file);
+        });
+
+        // ============================================================
+        //  导出 Excel（双 Sheet 报表）
+        // ============================================================
+        document.getElementById('exportBtn').addEventListener('click', function() {
+            const records = getRecords();
+            if (!records.length) { alert('没有记录可导出'); return; }
+
+            const sorted = [...records].sort((a, b) => (a.date + a.time < b.date + b.time ? -1 : 1));
+
+            let htmlContent = `
+                    <html>
+                    <head><meta charset="UTF-8"></head>
+                    <body>
+                        <table>
+                            <caption>故障明细（按时间排序）</caption>
+                            <thead>
+                                <tr><th>日期</th><th>时间</th><th>设备</th><th>报警种类</th><th>处理时间(分钟)</th><th>备注</th></tr>
+                            </thead>
+                            <tbody>
+                                ${sorted.map(r => `<tr><td>${r.date}</td><td>${r.time}</td><td>${r.device}</td><td>${r.alarm}</td><td>${r.duration}</td><td>${r.note||''}</td></tr>`).join('')}
+                            </tbody>
+                        </table>
+                        <br><br>
+            `;
+
+            const groupMap = {};
+            sorted.forEach(r => {
+                const key = r.device + '|' + r.alarm;
+                if (!groupMap[key]) {
+                    groupMap[key] = { device: r.device, alarm: r.alarm, count: 0, totalDuration: 0 };
+                }
+                groupMap[key].count += 1;
+                groupMap[key].totalDuration += r.duration;
+            });
+
+            const groupList = Object.values(groupMap);
+            groupList.sort((a, b) => (a.device + a.alarm < b.device + b.alarm ? -1 : 1));
+
+            const deviceTotalMap = {};
+            groupList.forEach(g => {
+                if (!deviceTotalMap[g.device]) deviceTotalMap[g.device] = 0;
+                deviceTotalMap[g.device] += g.count;
+            });
+
+            htmlContent += `
+                        <table>
+                            <caption>设备故障汇总（按设备 + 报警种类分组）</caption>
+                            <thead>
+                                <tr><th>设备</th><th>报警种类</th><th>发生次数</th><th>总处理时间(分钟)</th><th>平均处理时间(分钟)</th></tr>
+                            </thead>
+                            <tbody>
+                                ${groupList.map(g => `<tr><td>${g.device}</td><td>${g.alarm}</td><td>${g.count}</td><td>${g.totalDuration}</td><td>${(g.totalDuration/g.count).toFixed(1)}</td></tr>`).join('')}
+                            </tbody>
+                            <tfoot>
+                                <tr><td colspan="5" style="text-align:center;font-weight:bold;">—— 各设备故障总次数 ——</td></tr>
+                                ${Object.keys(deviceTotalMap).sort().map(d => `<tr><td colspan="2" style="text-align:right;">${d} 合计：</td><td>${deviceTotalMap[d]} 次</td><td colspan="2"></td></tr>`).join('')}
+                            </tfoot>
+                        </table>
+                    </body>
+                    </html>
+            `;
+
+            const blob = new Blob([htmlContent], { type: 'application/vnd.ms-excel;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            const today = new Date().toISOString().slice(0, 10);
+            link.download = `故障报表_${today}.xls`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
+            showToast('📥 报表已导出');
+        });
+
+        // ============================================================
+        //  初始化
+        // ============================================================
+        renderSelects();
+        renderRecords();
+    </script>
+
+</body>
+</html>

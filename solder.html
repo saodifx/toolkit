@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>焊锡统计 · 含8:00-9:00</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+        body {
+            background: #f0f4f9;
+            padding: 16px 12px 40px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 620px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 28px;
+            padding: 20px 16px 28px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.07);
+        }
+        h1 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #0b1e33;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding-bottom: 14px;
+            border-bottom: 2px solid #e8edf4;
+        }
+        .date-selector {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: #f2f6fc;
+            padding: 4px 12px 4px 8px;
+            border-radius: 40px;
+            font-size: 14px;
+            font-weight: 400;
+            color: #1e3a5f;
+            flex-wrap: wrap;
+        }
+        .date-selector input[type="date"] {
+            border: none;
+            background: transparent;
+            font-size: 14px;
+            font-weight: 500;
+            color: #0b1e33;
+            outline: none;
+            padding: 4px 0;
+            width: 130px;
+        }
+        .date-selector button {
+            background: #1a4c7a;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 4px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .date-selector button:active { transform: scale(0.95); }
+
+        .date-tabs {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin: 10px 0 8px;
+            padding: 4px 0;
+        }
+        .date-tabs .tab {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #eef3fa;
+            padding: 6px 12px 6px 8px;
+            border-radius: 40px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #1e3a5f;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: 0.1s;
+            user-select: none;
+        }
+        .date-tabs .tab.active {
+            background: #1a4c7a;
+            color: white;
+            border-color: #1a4c7a;
+        }
+        .date-tabs .tab.active .del-date { color: rgba(255,255,255,0.7); }
+        .date-tabs .tab .del-date {
+            margin-left: 4px;
+            color: #b22234;
+            font-weight: 700;
+            background: rgba(255,255,255,0.3);
+            border-radius: 30px;
+            padding: 0 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .date-tabs .tab .del-date:hover { background: rgba(255,0,0,0.15); }
+        .date-tabs .tab input[type="checkbox"] {
+            width: 15px;
+            height: 15px;
+            accent-color: #1a4c7a;
+            cursor: pointer;
+            margin-right: 2px;
+        }
+        .date-tabs .tab.active input[type="checkbox"] { accent-color: white; }
+
+        .toolbar {
+            display: flex;
+            gap: 8px;
+            margin: 14px 0 12px;
+            flex-wrap: wrap;
+        }
+        .toolbar button {
+            padding: 8px 14px;
+            border: none;
+            border-radius: 40px;
+            font-size: 13px;
+            font-weight: 600;
+            background: #eef3fa;
+            color: #1e3a5f;
+            cursor: pointer;
+            transition: 0.12s;
+            flex: 1 0 auto;
+        }
+        .toolbar button:active { transform: scale(0.95); }
+        .toolbar .btn-primary { background: #1a4c7a; color: white; }
+        .toolbar .btn-success { background: #0f7b3a; color: white; }
+        .toolbar .btn-danger { background: #b22234; color: white; }
+        .toolbar .btn-outline { background: #e8edf4; color: #2c3e5c; }
+        .toolbar .btn-purple { background: #7c3aed; color: white; }
+        .toolbar .btn-amber { background: #d97706; color: white; }
+
+        .export-select-area {
+            background: #f8faff;
+            border-radius: 16px;
+            padding: 12px 14px;
+            margin: 8px 0 12px;
+            border: 1px solid #e2e9f2;
+        }
+        .export-select-area .label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .export-select-area .label-row span {
+            font-weight: 600;
+            color: #1e3a5f;
+            font-size: 14px;
+        }
+        .export-select-area .label-row .select-actions button {
+            padding: 4px 12px;
+            border: none;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            background: #eef3fa;
+            color: #1e3a5f;
+            margin-left: 4px;
+        }
+        .export-select-area .label-row .select-actions button:active { transform: scale(0.95); }
+        .export-select-area .label-row .select-actions .btn-all { background: #1a4c7a; color: white; }
+        .export-select-area .label-row .select-actions .btn-none { background: #e8edf4; color: #4a5a74; }
+
+        .time-checkboxes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 10px;
+        }
+        .time-checkboxes label {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 13px;
+            color: #1e3a5f;
+            background: white;
+            padding: 4px 10px 4px 6px;
+            border-radius: 30px;
+            border: 1px solid #dce2ec;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        .time-checkboxes label:active { transform: scale(0.96); }
+        .time-checkboxes label.checked {
+            background: #e0edff;
+            border-color: #1a4c7a;
+        }
+        .time-checkboxes input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: #1a4c7a;
+            cursor: pointer;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+            margin: 6px 0 10px;
+            border-radius: 16px;
+            border: 1px solid #e2e9f2;
+            -webkit-overflow-scrolling: touch;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            min-width: 480px;
+        }
+        th {
+            background: #f2f6fc;
+            color: #1e3a5f;
+            font-weight: 600;
+            padding: 8px 6px;
+            text-align: center;
+            border-bottom: 2px solid #d6e0ec;
+            white-space: nowrap;
+            position: relative;
+            min-width: 56px;
+        }
+        th .col-del {
+            display: inline-block;
+            margin-left: 4px;
+            color: #b22234;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 14px;
+            background: rgba(178, 34, 52, 0.08);
+            border-radius: 30px;
+            width: 20px;
+            height: 20px;
+            line-height: 20px;
+            text-align: center;
+        }
+        th .col-del:active { background: rgba(178, 34, 52, 0.25); }
+        th:first-child, td:first-child {
+            min-width: 110px;
+            max-width: 140px;
+            width: 120px;
+            white-space: nowrap;
+        }
+        td {
+            padding: 4px 4px;
+            text-align: center;
+            border-bottom: 1px solid #e8edf4;
+            vertical-align: middle;
+        }
+        td input[type="number"] {
+            width: 100%;
+            min-width: 36px;
+            max-width: 60px;
+            padding: 5px 2px;
+            text-align: center;
+            border: 1px solid #d0dae8;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            background: #fafcff;
+            color: #0b1e33;
+            outline: none;
+            transition: 0.1s;
+        }
+        td input[type="number"]:focus {
+            border-color: #1a4c7a;
+            box-shadow: 0 0 0 3px rgba(26, 76, 122, 0.12);
+            background: white;
+        }
+        td input[type="number"]::-webkit-outer-spin-button,
+        td input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+        td input[type="number"] { -moz-appearance: textfield; }
+
+        .row-label {
+            font-weight: 600;
+            color: #1e3a5f;
+            background: #f8faff;
+            padding: 0 6px;
+            white-space: nowrap;
+            font-size: 13px;
+        }
+        .row-label input {
+            width: 100%;
+            min-width: 80px;
+            border: none;
+            background: transparent;
+            font-weight: 600;
+            color: #0b1e33;
+            text-align: center;
+            font-size: 13px;
+            padding: 6px 4px;
+            outline: none;
+            border-bottom: 1px dashed #b8cae0;
+        }
+        .row-label input:focus { border-bottom-color: #1a4c7a; }
+        .row-total {
+            font-weight: 700;
+            color: #0b2b4a;
+            background: #edf3fc;
+            border-radius: 20px;
+            padding: 2px 10px;
+            display: inline-block;
+            min-width: 32px;
+            font-size: 14px;
+        }
+        .col-total-row td {
+            background: #f2f8ff;
+            font-weight: 700;
+            color: #0b2b4a;
+            border-top: 2px solid #b8cae0;
+            padding: 8px 4px;
+        }
+        .col-total-row .row-label { background: #f2f8ff; }
+
+        .footer-actions {
+            display: flex;
+            gap: 10px;
+            margin: 18px 0 6px;
+            flex-wrap: wrap;
+        }
+        .footer-actions button {
+            flex: 1;
+            min-width: 80px;
+            padding: 12px 0;
+            border: none;
+            border-radius: 60px;
+            font-size: 15px;
+            font-weight: 600;
+            background: #eef3fa;
+            color: #1e3a5f;
+            cursor: pointer;
+            transition: 0.12s;
+        }
+        .footer-actions button:active { transform: scale(0.96); }
+        .footer-actions .btn-export { background: #0f7b3a; color: white; }
+        .footer-actions .btn-reset { background: #e8edf4; color: #4a5a74; }
+        .footer-actions .btn-backup { background: #7c3aed; color: white; }
+        .footer-actions .btn-restore { background: #d97706; color: white; }
+
+        .hint {
+            font-size: 12px;
+            color: #5e6f8d;
+            text-align: center;
+            margin-top: 14px;
+            background: #f6f9fe;
+            padding: 8px 12px;
+            border-radius: 40px;
+            border: 1px dashed #c8d6e8;
+        }
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e2f44;
+            color: white;
+            padding: 10px 24px;
+            border-radius: 60px;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 8px 28px rgba(0,0,0,0.25);
+            z-index: 999;
+            max-width: 92%;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            backdrop-filter: blur(4px);
+            background: rgba(20, 40, 60, 0.94);
+            border: 1px solid rgba(255,255,255,0.08);
+            pointer-events: none;
+        }
+        .toast.show { opacity: 1; }
+
+        #restoreFileInput {
+            display: none;
+        }
+
+        @media (max-width: 480px) {
+            th:first-child, td:first-child {
+                min-width: 90px;
+                max-width: 110px;
+                width: 100px;
+            }
+            .row-label input {
+                min-width: 60px;
+                font-size: 12px;
+                padding: 4px 2px;
+            }
+            td input[type="number"] {
+                min-width: 30px;
+                max-width: 48px;
+                font-size: 13px;
+                padding: 4px 0;
+            }
+            th, td { font-size: 12px; padding: 4px 3px; }
+            .toolbar button { font-size: 12px; padding: 6px 10px; }
+            .container { padding: 16px 10px 20px; }
+            .time-checkboxes label { font-size: 12px; padding: 3px 8px 3px 4px; }
+            .date-tabs .tab { font-size: 12px; padding: 4px 8px 4px 6px; }
+            .footer-actions button { font-size: 13px; padding: 10px 0; min-width: 60px; }
+        }
+        @media (max-width: 380px) {
+            th:first-child, td:first-child {
+                min-width: 76px;
+                max-width: 90px;
+                width: 80px;
+            }
+            .row-label input { min-width: 50px; font-size: 11px; }
+            td input[type="number"] { min-width: 26px; max-width: 40px; font-size: 12px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>
+        <span>🔧 焊锡统计</span>
+        <span class="date-selector">
+            📅 <input type="date" id="datePicker" value="2026-08-27">
+            <button id="addDateBtn">➕ 添加</button>
+        </span>
+    </h1>
+
+    <div class="date-tabs" id="dateTabs"></div>
+
+    <div class="export-select-area" id="exportSelectArea">
+        <div class="label-row">
+            <span>📤 选择要导出的时段</span>
+            <div class="select-actions">
+                <button class="btn-all" id="selectAllTimes">全部</button>
+                <button class="btn-none" id="selectNoneTimes">取消</button>
+            </div>
+        </div>
+        <div class="time-checkboxes" id="timeCheckboxes"></div>
+    </div>
+
+    <div class="toolbar">
+        <button class="btn-primary" id="addRowBtn">➕ 增加时段</button>
+        <button id="removeRowBtn">➖ 删除末行</button>
+        <button class="btn-purple" id="addColBtn">➕ 添加故障</button>
+        <button class="btn-danger" id="removeColBtn">➖ 删除末项</button>
+        <button class="btn-outline" id="clearAllBtn">🗑️ 清空当前</button>
+    </div>
+
+    <div class="table-wrap">
+        <table id="dataTable">
+            <thead id="tableHead"><tr><th style="min-width:110px;">时段</th></tr></thead>
+            <tbody id="tableBody"></tbody>
+            <tfoot id="tableFoot"></tfoot>
+        </table>
+    </div>
+
+    <div class="footer-actions">
+        <button class="btn-export" id="exportBtn">📥 导出Excel</button>
+        <button class="btn-backup" id="backupBtn">💾 备份数据</button>
+        <button class="btn-restore" id="restoreBtn">📂 恢复备份</button>
+        <button class="btn-reset" id="resetDefaultBtn">↺ 重置</button>
+    </div>
+    <div class="hint">
+        ⚡ 默认包含 8:00-9:00 · 备份可保存所有日期数据
+    </div>
+</div>
+
+<input type="file" id="restoreFileInput" accept=".json">
+
+<div class="toast" id="toast"></div>
+
+<script>
+    (function() {
+        // ----- 数据结构 -----
+        let allData = {};
+        let currentDate = '2026-08-27';
+        const DEFAULT_COLUMNS = ['漏焊', '虚焊', '锡珠', '烧糊', '翘边'];
+        // ✅ 新增 8:00-9:00 时段，放在最前面
+        const DEFAULT_ROWS = [
+            { time: '8:00-9:00', defects: [0, 0, 0, 0, 0] },
+            { time: '9:00-10:10', defects: [11, 2, 2, 0, 5] },
+            { time: '10:10-11:10', defects: [6, 1, 0, 0, 4] },
+            { time: '11:10-13:10', defects: [5, 0, 0, 2, 2] },
+            { time: '13:10-14:10', defects: [6, 0, 2, 1, 6] },
+            { time: '14:10-15:10', defects: [4, 0, 2, 0, 5] },
+            { time: '15:10-16:20', defects: [6, 1, 2, 2, 3] },
+            { time: '16:20-17:20', defects: [10, 6, 0, 0, 8] }
+        ];
+
+        let selectedDates = new Set();
+        let selectedTimeIndices = new Set();
+
+        const thead = document.getElementById('tableHead');
+        const tbody = document.getElementById('tableBody');
+        const tfoot = document.getElementById('tableFoot');
+        const toastEl = document.getElementById('toast');
+        const datePicker = document.getElementById('datePicker');
+        const dateTabs = document.getElementById('dateTabs');
+        const timeCheckboxes = document.getElementById('timeCheckboxes');
+        const restoreFileInput = document.getElementById('restoreFileInput');
+
+        function showToast(msg, duration = 2000) {
+            toastEl.textContent = msg;
+            toastEl.classList.add('show');
+            clearTimeout(toastEl._timer);
+            toastEl._timer = setTimeout(() => {
+                toastEl.classList.remove('show');
+            }, duration);
+        }
+
+        function cloneRows(rows) {
+            return rows.map(r => ({ time: r.time, defects: [...r.defects] }));
+        }
+
+        function createEmptyRows(columns, templateRows) {
+            return templateRows.map(row => ({
+                time: row.time,
+                defects: new Array(columns.length).fill(0)
+            }));
+        }
+
+        function getDateData(date) {
+            if (!allData[date]) {
+                const columns = [...DEFAULT_COLUMNS];
+                allData[date] = {
+                    columns: columns,
+                    rows: createEmptyRows(columns, DEFAULT_ROWS)
+                };
+            }
+            return allData[date];
+        }
+
+        function getCurrentData() {
+            return getDateData(currentDate);
+        }
+
+        function normalizeRows(data) {
+            const colCount = data.columns.length;
+            data.rows.forEach(row => {
+                while (row.defects.length < colCount) row.defects.push(0);
+                if (row.defects.length > colCount) {
+                    row.defects = row.defects.slice(0, colCount);
+                }
+            });
+        }
+
+        // ----- 核心渲染函数 -----
+        function renderTable() {
+            const data = getCurrentData();
+            if (data.columns.length === 0) data.columns = ['漏焊'];
+            if (data.rows.length === 0) {
+                data.rows = [{ time: '8:00-9:00', defects: new Array(data.columns.length).fill(0) }];
+            }
+            normalizeRows(data);
+
+            let headerHtml = `<tr><th style="min-width:110px;">时段</th>`;
+            data.columns.forEach((col, idx) => {
+                headerHtml += `<th>
+                    <input type="text" value="${escapeHtml(col)}" class="col-name-input" data-col="${idx}" style="width:100%;min-width:40px;border:none;background:transparent;font-weight:600;color:#0b1e33;text-align:center;font-size:12px;padding:4px 2px;outline:none;border-bottom:1px dashed #b8cae0;">
+                    <span class="col-del" data-col="${idx}" title="删除此故障">✕</span>
+                </th>`;
+            });
+            headerHtml += `<th style="min-width:44px;">合计</th></tr>`;
+            thead.innerHTML = headerHtml;
+
+            document.querySelectorAll('.col-name-input').forEach(inp => {
+                inp.addEventListener('change', function() {
+                    const idx = parseInt(this.dataset.col);
+                    const data = getCurrentData();
+                    if (!isNaN(idx) && idx < data.columns.length) {
+                        const newName = this.value.trim() || '故障';
+                        data.columns[idx] = newName;
+                        renderTable();
+                        showToast('✅ 故障名已更新');
+                    }
+                });
+                inp.addEventListener('focus', function() { this.select(); });
+            });
+
+            document.querySelectorAll('.col-del').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const idx = parseInt(this.dataset.col);
+                    const data = getCurrentData();
+                    if (data.columns.length <= 1) {
+                        showToast('⚠️ 至少保留一个故障');
+                        return;
+                    }
+                    if (confirm(`确定删除故障 “${data.columns[idx]}” 及其所有数据吗？`)) {
+                        data.columns.splice(idx, 1);
+                        data.rows.forEach(row => row.defects.splice(idx, 1));
+                        renderTable();
+                        showToast('🗑️ 故障已删除');
+                    }
+                });
+            });
+
+            let bodyHtml = '';
+            data.rows.forEach((row, rowIndex) => {
+                const def = row.defects;
+                const total = def.reduce((a, b) => a + b, 0);
+                bodyHtml += `<tr data-index="${rowIndex}">`;
+                bodyHtml += `<td class="row-label"><input type="text" value="${escapeHtml(row.time)}" class="time-input" data-index="${rowIndex}" /></td>`;
+                for (let i = 0; i < data.columns.length; i++) {
+                    const val = (i < def.length) ? def[i] : 0;
+                    bodyHtml += `<td><input type="number" min="0" step="1" value="${val}" class="def-input" data-row="${rowIndex}" data-col="${i}" /></td>`;
+                }
+                bodyHtml += `<td><span class="row-total">${total}</span></td>`;
+                bodyHtml += `</tr>`;
+            });
+            tbody.innerHTML = bodyHtml;
+
+            document.querySelectorAll('.time-input').forEach(inp => {
+                inp.addEventListener('change', function() {
+                    const idx = parseInt(this.dataset.index);
+                    const data = getCurrentData();
+                    if (!isNaN(idx) && data.rows[idx]) {
+                        data.rows[idx].time = this.value.trim() || '时段';
+                        renderTimeCheckboxes();
+                    }
+                });
+                inp.addEventListener('focus', function() { this.select(); });
+            });
+
+            document.querySelectorAll('.def-input').forEach(inp => {
+                inp.removeEventListener('input', handleDefInput);
+                inp.addEventListener('input', handleDefInput);
+            });
+
+            renderFooter();
+            renderDateTabs();
+            renderTimeCheckboxes();
+            datePicker.value = currentDate;
+        }
+
+        function handleDefInput(e) {
+            const inp = e.target;
+            const rowIdx = parseInt(inp.dataset.row);
+            const colIdx = parseInt(inp.dataset.col);
+            const data = getCurrentData();
+            if (isNaN(rowIdx) || isNaN(colIdx) || !data.rows[rowIdx]) return;
+            let val = parseInt(inp.value);
+            if (isNaN(val) || val < 0) val = 0;
+            data.rows[rowIdx].defects[colIdx] = val;
+            updateRowTotal(rowIdx);
+        }
+
+        function updateRowTotal(index) {
+            const data = getCurrentData();
+            if (!data.rows[index]) return;
+            const def = data.rows[index].defects;
+            const total = def.reduce((a, b) => a + b, 0);
+            const rowEl = tbody.querySelector(`tr[data-index="${index}"]`);
+            if (rowEl) {
+                const totalSpan = rowEl.querySelector('.row-total');
+                if (totalSpan) totalSpan.textContent = total;
+            }
+            renderFooter();
+        }
+
+        function renderFooter() {
+            const data = getCurrentData();
+            if (!data.rows.length || data.columns.length === 0) {
+                tfoot.innerHTML = '';
+                return;
+            }
+            const colSums = new Array(data.columns.length).fill(0);
+            data.rows.forEach(row => {
+                row.defects.forEach((val, idx) => {
+                    colSums[idx] += val;
+                });
+            });
+            const totalAll = colSums.reduce((a, b) => a + b, 0);
+
+            let footerHtml = `<tr class="col-total-row">`;
+            footerHtml += `<td class="row-label">📊 合计</td>`;
+            colSums.forEach(sum => {
+                footerHtml += `<td><strong>${sum}</strong></td>`;
+            });
+            footerHtml += `<td><strong>${totalAll}</strong></td>`;
+            footerHtml += `</tr>`;
+            tfoot.innerHTML = footerHtml;
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        // ----- 时段复选框 -----
+        function renderTimeCheckboxes() {
+            const data = getCurrentData();
+            const rows = data.rows;
+            const validIndices = new Set();
+            rows.forEach((_, idx) => {
+                if (selectedTimeIndices.has(idx)) validIndices.add(idx);
+            });
+            selectedTimeIndices = validIndices;
+
+            if (rows.length === 0) {
+                timeCheckboxes.innerHTML = '<span style="color:#999;font-size:13px;">暂无时段</span>';
+                return;
+            }
+
+            let html = '';
+            rows.forEach((row, idx) => {
+                const checked = selectedTimeIndices.has(idx) ? 'checked' : '';
+                html += `<label class="${checked ? 'checked' : ''}">
+                    <input type="checkbox" data-index="${idx}" ${checked}>
+                    ${escapeHtml(row.time)}
+                </label>`;
+            });
+            timeCheckboxes.innerHTML = html;
+
+            timeCheckboxes.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                cb.addEventListener('change', function() {
+                    const idx = parseInt(this.dataset.index);
+                    if (this.checked) {
+                        selectedTimeIndices.add(idx);
+                        this.closest('label').classList.add('checked');
+                    } else {
+                        selectedTimeIndices.delete(idx);
+                        this.closest('label').classList.remove('checked');
+                    }
+                });
+            });
+        }
+
+        // ----- 日期标签 -----
+        function renderDateTabs() {
+            const dates = Object.keys(allData).sort();
+            if (dates.length === 0) {
+                const cols = [...DEFAULT_COLUMNS];
+                allData[currentDate] = {
+                    columns: cols,
+                    rows: createEmptyRows(cols, DEFAULT_ROWS)
+                };
+                renderDateTabs();
+                return;
+            }
+            if (!allData[currentDate]) {
+                currentDate = dates[0];
+            }
+
+            let html = '';
+            dates.forEach(d => {
+                const isActive = d === currentDate;
+                const isChecked = selectedDates.has(d);
+                const activeClass = isActive ? 'active' : '';
+                html += `<span class="tab ${activeClass}" data-date="${d}">
+                    <input type="checkbox" class="date-checkbox" data-date="${d}" ${isChecked ? 'checked' : ''}>
+                    ${d}
+                    ${dates.length > 1 ? `<span class="del-date" data-date="${d}">✕</span>` : ''}
+                </span>`;
+            });
+            dateTabs.innerHTML = html;
+
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', function(e) {
+                    if (e.target.classList.contains('date-checkbox') || e.target.classList.contains('del-date')) return;
+                    const date = this.dataset.date;
+                    if (date && allData[date]) {
+                        currentDate = date;
+                        renderTable();
+                    }
+                });
+
+                const cb = tab.querySelector('.date-checkbox');
+                if (cb) {
+                    cb.addEventListener('change', function(e) {
+                        e.stopPropagation();
+                        const date = this.dataset.date;
+                        if (this.checked) {
+                            selectedDates.add(date);
+                        } else {
+                            selectedDates.delete(date);
+                        }
+                        this.closest('.tab').classList.toggle('active', this.checked);
+                        showToast(this.checked ? `✅ 已选 ${date}` : `取消选中 ${date}`);
+                    });
+                }
+
+                const delBtn = tab.querySelector('.del-date');
+                if (delBtn) {
+                    delBtn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        const date = this.dataset.date;
+                        if (Object.keys(allData).length <= 1) {
+                            showToast('⚠️ 至少保留一个日期');
+                            return;
+                        }
+                        if (confirm(`确定删除 ${date} 的所有数据吗？`)) {
+                            selectedDates.delete(date);
+                            delete allData[date];
+                            const remaining = Object.keys(allData).sort();
+                            if (remaining.length > 0) {
+                                currentDate = remaining[0];
+                            }
+                            renderTable();
+                            showToast(`🗑️ 已删除 ${date}`);
+                        }
+                    });
+                }
+            });
+
+            document.querySelectorAll('.date-checkbox').forEach(cb => {
+                const tab = cb.closest('.tab');
+                if (cb.checked) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+        }
+
+        // ----- 添加故障 -----
+        function addCustomColumn() {
+            const data = getCurrentData();
+            const newName = prompt('请输入新故障名称:', '新故障');
+            if (newName === null) return;
+            const name = newName.trim() || '新故障';
+            data.columns.push(name);
+            data.rows.forEach(row => row.defects.push(0));
+            renderTable();
+            showToast(`➕ 已添加故障: ${name}`);
+        }
+
+        function removeLastColumn() {
+            const data = getCurrentData();
+            if (data.columns.length <= 1) {
+                showToast('⚠️ 至少保留一个故障');
+                return;
+            }
+            const last = data.columns[data.columns.length - 1];
+            if (confirm(`确定删除故障 “${last}” 及其数据吗？`)) {
+                data.columns.pop();
+                data.rows.forEach(row => row.defects.pop());
+                renderTable();
+                showToast(`🗑️ 已删除故障: ${last}`);
+            }
+        }
+
+        // ----- 其他操作 -----
+        function addRow() {
+            const data = getCurrentData();
+            const lastRow = data.rows[data.rows.length - 1];
+            let newTime = '新时段';
+            if (lastRow) {
+                const parts = lastRow.time.split('-');
+                if (parts.length === 2) {
+                    const end = parts[1];
+                    const endHour = parseInt(end.split(':')[0]);
+                    if (!isNaN(endHour)) {
+                        const newStart = end;
+                        const newEndHour = endHour + 1;
+                        const newEnd = `${String(newEndHour).padStart(2, '0')}:${end.split(':')[1] || '00'}`;
+                        newTime = `${newStart}-${newEnd}`;
+                    }
+                }
+            }
+            data.rows.push({
+                time: newTime,
+                defects: new Array(data.columns.length).fill(0)
+            });
+            selectedTimeIndices.add(data.rows.length - 1);
+            renderTable();
+            showToast('✅ 已增加时段');
+        }
+
+        function removeLastRow() {
+            const data = getCurrentData();
+            if (data.rows.length <= 1) {
+                showToast('⚠️ 至少保留一行');
+                return;
+            }
+            const lastIdx = data.rows.length - 1;
+            selectedTimeIndices.delete(lastIdx);
+            data.rows.pop();
+            renderTable();
+            showToast('🗑️ 已删除末行');
+        }
+
+        function clearAll() {
+            const data = getCurrentData();
+            if (data.rows.length === 0) return;
+            if (confirm(`确定清空 ${currentDate} 的所有数据吗？`)) {
+                data.rows = [{ time: '8:00-9:00', defects: new Array(data.columns.length).fill(0) }];
+                selectedTimeIndices.clear();
+                selectedTimeIndices.add(0);
+                renderTable();
+                showToast('已清空，保留一行占位');
+            }
+        }
+
+        function addDate() {
+            const date = datePicker.value;
+            if (!date) {
+                showToast('⚠️ 请选择有效日期');
+                return;
+            }
+            if (allData[date]) {
+                showToast('⚠️ 该日期已存在，请切换查看');
+                return;
+            }
+            const cols = [...DEFAULT_COLUMNS];
+            allData[date] = {
+                columns: cols,
+                rows: createEmptyRows(cols, DEFAULT_ROWS)
+            };
+            currentDate = date;
+            selectedDates.add(date);
+            renderTable();
+            showToast(`✅ 已添加日期: ${date} (数据已清零)`);
+        }
+
+        // ----- 导出 Excel (CSV) -----
+        function exportSelected() {
+            const selectedDateList = Array.from(selectedDates).sort();
+            if (selectedDateList.length === 0) {
+                showToast('⚠️ 请至少勾选一个日期');
+                return;
+            }
+
+            const validDates = selectedDateList.filter(d => allData[d] && allData[d].rows.length > 0);
+            if (validDates.length === 0) {
+                showToast('⚠️ 选中日期没有数据');
+                return;
+            }
+
+            let csvRows = [];
+            csvRows.push('"焊锡问题统计表"');
+            csvRows.push('');
+
+            let totalExportedRows = 0;
+
+            validDates.forEach(date => {
+                const data = allData[date];
+                if (!data || !data.rows.length) return;
+
+                const selectedRows = [];
+                data.rows.forEach((row, idx) => {
+                    if (selectedTimeIndices.has(idx)) {
+                        selectedRows.push(row);
+                    }
+                });
+
+                if (selectedRows.length === 0) return;
+
+                csvRows.push(`"日期","${date}"`);
+                const header = ['时段', ...data.columns, '合计'];
+                csvRows.push(header.map(h => `"${h}"`).join(','));
+
+                selectedRows.forEach(row => {
+                    const def = row.defects;
+                    const total = def.reduce((a, b) => a + b, 0);
+                    const rowData = [
+                        `"${row.time}"`,
+                        ...def.map(v => v ?? 0),
+                        total
+                    ];
+                    csvRows.push(rowData.join(','));
+                });
+
+                if (selectedRows.length > 0) {
+                    const colSums = new Array(data.columns.length).fill(0);
+                    selectedRows.forEach(row => {
+                        row.defects.forEach((val, idx) => {
+                            colSums[idx] += val;
+                        });
+                    });
+                    const totalAll = colSums.reduce((a, b) => a + b, 0);
+                    const footerRow = ['"合计"', ...colSums, totalAll];
+                    csvRows.push(footerRow.join(','));
+                }
+
+                csvRows.push('');
+                totalExportedRows += selectedRows.length;
+            });
+
+            if (totalExportedRows === 0) {
+                showToast('⚠️ 选中日期没有勾选任何时段');
+                return;
+            }
+
+            const csvContent = csvRows.join('\n');
+            const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            const dateStr = validDates.join('_');
+            link.setAttribute('href', url);
+            link.setAttribute('download', `焊锡统计_${dateStr}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+
+            showToast(`📥 已导出 ${validDates.length} 个日期, ${totalExportedRows} 个时段`);
+        }
+
+        // ----- 备份数据 (JSON) -----
+        function backupData() {
+            const dataStr = JSON.stringify(allData, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            const now = new Date();
+            const dateStr = now.toISOString().slice(0,10);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `焊锡备份_${dateStr}.json`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            showToast('💾 备份文件已下载');
+        }
+
+        // ----- 恢复备份 -----
+        function restoreBackup(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (typeof imported !== 'object' || imported === null) {
+                        throw new Error('无效的数据格式');
+                    }
+                    const keys = Object.keys(imported);
+                    if (keys.length === 0) {
+                        throw new Error('备份文件为空');
+                    }
+                    const firstKey = keys[0];
+                    if (!imported[firstKey].columns || !imported[firstKey].rows) {
+                        throw new Error('数据结构不完整');
+                    }
+                    if (!confirm(`确定恢复备份吗？将覆盖当前所有 ${keys.length} 个日期的数据。`)) {
+                        return;
+                    }
+                    allData = imported;
+                    selectedDates.clear();
+                    selectedTimeIndices.clear();
+                    const sortedKeys = Object.keys(allData).sort();
+                    if (sortedKeys.length > 0) {
+                        currentDate = sortedKeys[0];
+                        sortedKeys.forEach(d => selectedDates.add(d));
+                        const data = allData[currentDate];
+                        if (data && data.rows) {
+                            data.rows.forEach((_, idx) => selectedTimeIndices.add(idx));
+                        }
+                    }
+                    renderTable();
+                    showToast(`✅ 备份恢复成功！共 ${keys.length} 个日期`);
+                } catch (err) {
+                    showToast('❌ 恢复失败: ' + err.message);
+                    console.error(err);
+                }
+            };
+            reader.onerror = function() {
+                showToast('❌ 读取文件失败');
+            };
+            reader.readAsText(file);
+        }
+
+        function selectAllTimes() {
+            const data = getCurrentData();
+            data.rows.forEach((_, idx) => selectedTimeIndices.add(idx));
+            renderTimeCheckboxes();
+            showToast('✅ 已全选所有时段');
+        }
+
+        function selectNoneTimes() {
+            selectedTimeIndices.clear();
+            renderTimeCheckboxes();
+            showToast('已取消所有时段选择');
+        }
+
+        function resetDefault() {
+            if (confirm('将覆盖所有日期数据，确定恢复默认？')) {
+                allData = {};
+                currentDate = '2026-08-27';
+                const cols = [...DEFAULT_COLUMNS];
+                allData[currentDate] = {
+                    columns: cols,
+                    rows: createEmptyRows(cols, DEFAULT_ROWS)
+                };
+                selectedDates.clear();
+                selectedDates.add(currentDate);
+                selectedTimeIndices.clear();
+                allData[currentDate].rows.forEach((_, idx) => selectedTimeIndices.add(idx));
+                renderTable();
+                showToast('↺ 已恢复默认数据 (已清零)');
+            }
+        }
+
+        // ----- 初始化 -----
+        function init() {
+            const defaultDate = '2026-08-27';
+            const cols = [...DEFAULT_COLUMNS];
+            allData[defaultDate] = {
+                columns: cols,
+                rows: createEmptyRows(cols, DEFAULT_ROWS)
+            };
+            currentDate = defaultDate;
+            datePicker.value = defaultDate;
+            selectedDates.add(defaultDate);
+            allData[currentDate].rows.forEach((_, idx) => selectedTimeIndices.add(idx));
+
+            renderTable();
+
+            document.getElementById('addDateBtn').addEventListener('click', addDate);
+            document.getElementById('addRowBtn').addEventListener('click', addRow);
+            document.getElementById('removeRowBtn').addEventListener('click', removeLastRow);
+            document.getElementById('addColBtn').addEventListener('click', addCustomColumn);
+            document.getElementById('removeColBtn').addEventListener('click', removeLastColumn);
+            document.getElementById('clearAllBtn').addEventListener('click', clearAll);
+            document.getElementById('exportBtn').addEventListener('click', exportSelected);
+            document.getElementById('resetDefaultBtn').addEventListener('click', resetDefault);
+            document.getElementById('selectAllTimes').addEventListener('click', selectAllTimes);
+            document.getElementById('selectNoneTimes').addEventListener('click', selectNoneTimes);
+
+            document.getElementById('backupBtn').addEventListener('click', backupData);
+
+            document.getElementById('restoreBtn').addEventListener('click', function() {
+                restoreFileInput.click();
+            });
+
+            restoreFileInput.addEventListener('change', function(e) {
+                if (this.files && this.files.length > 0) {
+                    restoreBackup(this.files[0]);
+                }
+                this.value = '';
+            });
+
+            datePicker.addEventListener('change', function() {
+                const date = this.value;
+                if (!date) return;
+                if (allData[date]) {
+                    currentDate = date;
+                    renderTable();
+                    showToast(`📅 切换到 ${date}`);
+                } else {
+                    showToast(`📅 ${date} 暂无数据，可点击 "添加" 创建 (数据将清零)`);
+                }
+            });
+        }
+
+        init();
+    })();
+</script>
+</body>
+</html>
