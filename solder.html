@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>焊锡统计 · 含8:00-9:00</title>
+    <title>焊锡统计 · 步进输入</title>
     <style>
         * {
             margin: 0;
@@ -253,34 +253,69 @@
             white-space: nowrap;
         }
         td {
-            padding: 4px 4px;
+            padding: 4px 3px;
             text-align: center;
             border-bottom: 1px solid #e8edf4;
             vertical-align: middle;
         }
-        td input[type="number"] {
+
+        /* 步进输入组 */
+        .step-group {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+        }
+        .step-group .step-btn {
+            width: 26px;
+            height: 28px;
+            border: 1px solid #d0dae8;
+            border-radius: 6px;
+            background: #f8faff;
+            color: #1e3a5f;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            transition: 0.1s;
+            user-select: none;
+            touch-action: manipulation;
+        }
+        .step-group .step-btn:active {
+            background: #dce2ec;
+            transform: scale(0.92);
+        }
+        .step-group .step-btn.minus { color: #b22234; }
+        .step-group .step-btn.plus { color: #0f7b3a; }
+
+        .step-group input[type="number"] {
             width: 100%;
-            min-width: 36px;
-            max-width: 60px;
-            padding: 5px 2px;
+            min-width: 32px;
+            max-width: 48px;
+            padding: 4px 0;
             text-align: center;
             border: 1px solid #d0dae8;
-            border-radius: 8px;
+            border-radius: 6px;
             font-size: 14px;
             font-weight: 500;
             background: #fafcff;
             color: #0b1e33;
             outline: none;
             transition: 0.1s;
+            -moz-appearance: textfield;
         }
-        td input[type="number"]:focus {
+        .step-group input[type="number"]::-webkit-outer-spin-button,
+        .step-group input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+        }
+        .step-group input[type="number"]:focus {
             border-color: #1a4c7a;
-            box-shadow: 0 0 0 3px rgba(26, 76, 122, 0.12);
+            box-shadow: 0 0 0 2px rgba(26, 76, 122, 0.12);
             background: white;
         }
-        td input[type="number"]::-webkit-outer-spin-button,
-        td input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
-        td input[type="number"] { -moz-appearance: textfield; }
 
         .row-label {
             font-weight: 600;
@@ -388,36 +423,42 @@
 
         @media (max-width: 480px) {
             th:first-child, td:first-child {
-                min-width: 90px;
-                max-width: 110px;
-                width: 100px;
+                min-width: 85px;
+                max-width: 100px;
+                width: 90px;
             }
             .row-label input {
-                min-width: 60px;
-                font-size: 12px;
+                min-width: 50px;
+                font-size: 11px;
                 padding: 4px 2px;
             }
-            td input[type="number"] {
-                min-width: 30px;
-                max-width: 48px;
+            .step-group input[type="number"] {
+                min-width: 28px;
+                max-width: 40px;
                 font-size: 13px;
-                padding: 4px 0;
+                padding: 3px 0;
             }
-            th, td { font-size: 12px; padding: 4px 3px; }
-            .toolbar button { font-size: 12px; padding: 6px 10px; }
-            .container { padding: 16px 10px 20px; }
-            .time-checkboxes label { font-size: 12px; padding: 3px 8px 3px 4px; }
-            .date-tabs .tab { font-size: 12px; padding: 4px 8px 4px 6px; }
-            .footer-actions button { font-size: 13px; padding: 10px 0; min-width: 60px; }
+            .step-group .step-btn {
+                width: 22px;
+                height: 24px;
+                font-size: 14px;
+            }
+            th, td { font-size: 11px; padding: 3px 2px; }
+            .toolbar button { font-size: 11px; padding: 5px 8px; }
+            .container { padding: 14px 8px 18px; }
+            .time-checkboxes label { font-size: 11px; padding: 2px 6px 2px 4px; }
+            .date-tabs .tab { font-size: 11px; padding: 4px 6px 4px 4px; }
+            .footer-actions button { font-size: 12px; padding: 8px 0; min-width: 50px; }
         }
         @media (max-width: 380px) {
             th:first-child, td:first-child {
-                min-width: 76px;
-                max-width: 90px;
-                width: 80px;
+                min-width: 70px;
+                max-width: 80px;
+                width: 75px;
             }
-            .row-label input { min-width: 50px; font-size: 11px; }
-            td input[type="number"] { min-width: 26px; max-width: 40px; font-size: 12px; }
+            .row-label input { min-width: 40px; font-size: 10px; }
+            .step-group input[type="number"] { min-width: 24px; max-width: 34px; font-size: 12px; }
+            .step-group .step-btn { width: 20px; height: 22px; font-size: 12px; }
         }
     </style>
 </head>
@@ -467,7 +508,7 @@
         <button class="btn-reset" id="resetDefaultBtn">↺ 重置</button>
     </div>
     <div class="hint">
-        ⚡ 默认包含 8:00-9:00 · 备份可保存所有日期数据
+        ⚡ 点击 + / - 按钮快速累加 · 也可直接输入数字
     </div>
 </div>
 
@@ -481,7 +522,6 @@
         let allData = {};
         let currentDate = '2026-08-27';
         const DEFAULT_COLUMNS = ['漏焊', '虚焊', '锡珠', '烧糊', '翘边'];
-        // ✅ 新增 8:00-9:00 时段，放在最前面
         const DEFAULT_ROWS = [
             { time: '8:00-9:00', defects: [0, 0, 0, 0, 0] },
             { time: '9:00-10:10', defects: [11, 2, 2, 0, 5] },
@@ -550,6 +590,23 @@
             });
         }
 
+        // ----- 步进按钮处理 -----
+        function handleStep(rowIdx, colIdx, delta) {
+            const data = getCurrentData();
+            if (!data.rows[rowIdx]) return;
+            const current = data.rows[rowIdx].defects[colIdx] || 0;
+            const newVal = Math.max(0, current + delta);
+            data.rows[rowIdx].defects[colIdx] = newVal;
+            // 更新输入框显示
+            const input = document.querySelector(`.def-input[data-row="${rowIdx}"][data-col="${colIdx}"]`);
+            if (input) {
+                input.value = newVal;
+            }
+            updateRowTotal(rowIdx);
+            // 更新合计行
+            renderFooter();
+        }
+
         // ----- 核心渲染函数 -----
         function renderTable() {
             const data = getCurrentData();
@@ -609,13 +666,20 @@
                 bodyHtml += `<td class="row-label"><input type="text" value="${escapeHtml(row.time)}" class="time-input" data-index="${rowIndex}" /></td>`;
                 for (let i = 0; i < data.columns.length; i++) {
                     const val = (i < def.length) ? def[i] : 0;
-                    bodyHtml += `<td><input type="number" min="0" step="1" value="${val}" class="def-input" data-row="${rowIndex}" data-col="${i}" /></td>`;
+                    bodyHtml += `<td>
+                        <div class="step-group">
+                            <button class="step-btn minus" data-row="${rowIndex}" data-col="${i}" data-delta="-1">−</button>
+                            <input type="number" min="0" step="1" value="${val}" class="def-input" data-row="${rowIndex}" data-col="${i}" />
+                            <button class="step-btn plus" data-row="${rowIndex}" data-col="${i}" data-delta="1">+</button>
+                        </div>
+                    </td>`;
                 }
                 bodyHtml += `<td><span class="row-total">${total}</span></td>`;
                 bodyHtml += `</tr>`;
             });
             tbody.innerHTML = bodyHtml;
 
+            // 时段输入
             document.querySelectorAll('.time-input').forEach(inp => {
                 inp.addEventListener('change', function() {
                     const idx = parseInt(this.dataset.index);
@@ -628,9 +692,41 @@
                 inp.addEventListener('focus', function() { this.select(); });
             });
 
+            // 步进按钮事件
+            document.querySelectorAll('.step-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const rowIdx = parseInt(this.dataset.row);
+                    const colIdx = parseInt(this.dataset.col);
+                    const delta = parseInt(this.dataset.delta);
+                    if (!isNaN(rowIdx) && !isNaN(colIdx) && !isNaN(delta)) {
+                        handleStep(rowIdx, colIdx, delta);
+                    }
+                });
+                // 防止触摸时页面滚动
+                btn.addEventListener('touchstart', function(e) {
+                    // 不阻止默认，只防止双击缩放
+                }, { passive: true });
+            });
+
+            // 缺陷输入（手动输入）
             document.querySelectorAll('.def-input').forEach(inp => {
                 inp.removeEventListener('input', handleDefInput);
                 inp.addEventListener('input', handleDefInput);
+                // 失去焦点时确保值有效
+                inp.addEventListener('blur', function() {
+                    let val = parseInt(this.value);
+                    if (isNaN(val) || val < 0) val = 0;
+                    const rowIdx = parseInt(this.dataset.row);
+                    const colIdx = parseInt(this.dataset.col);
+                    const data = getCurrentData();
+                    if (!isNaN(rowIdx) && !isNaN(colIdx) && data.rows[rowIdx]) {
+                        data.rows[rowIdx].defects[colIdx] = val;
+                        this.value = val;
+                        updateRowTotal(rowIdx);
+                        renderFooter();
+                    }
+                });
             });
 
             renderFooter();
@@ -649,6 +745,7 @@
             if (isNaN(val) || val < 0) val = 0;
             data.rows[rowIdx].defects[colIdx] = val;
             updateRowTotal(rowIdx);
+            renderFooter();
         }
 
         function updateRowTotal(index) {
@@ -661,7 +758,6 @@
                 const totalSpan = rowEl.querySelector('.row-total');
                 if (totalSpan) totalSpan.textContent = total;
             }
-            renderFooter();
         }
 
         function renderFooter() {
