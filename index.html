@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🛠️ 工具箱</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            min-height: 100vh;
+            background: linear-gradient(145deg, #0f0c1f, #1a1435);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 640px;
+            width: 100%;
+            text-align: center;
+        }
+        h1 {
+            font-size: 2.8rem;
+            color: #fff;
+            margin-bottom: 4px;
+            letter-spacing: 2px;
+        }
+        .subtitle {
+            color: #a89bc2;
+            font-size: 1rem;
+            margin-bottom: 36px;
+            font-weight: 300;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 32px 12px 24px;
+            text-decoration: none;
+            color: #fff;
+            transition: 0.25s ease;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+        .card:hover {
+            transform: translateY(-6px) scale(1.02);
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.25);
+            box-shadow: 0 16px 40px rgba(80, 40, 200, 0.2);
+        }
+        .card .icon {
+            font-size: 3rem;
+            display: block;
+            margin-bottom: 10px;
+        }
+        .card .name {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        .card .desc {
+            font-size: 0.78rem;
+            color: #a89bc2;
+            margin-top: 4px;
+        }
+        .footer {
+            margin-top: 32px;
+            color: #5a4a78;
+            font-size: 0.75rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            padding-top: 18px;
+        }
+        @media (max-width: 480px) {
+            h1 { font-size: 2.2rem; }
+            .grid { gap: 12px; }
+            .card { padding: 24px 8px 18px; }
+            .card .icon { font-size: 2.4rem; }
+            .card .name { font-size: 0.95rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛠️ 工具箱</h1>
+        <p class="subtitle">选一个工具开始使用</p>
+        <div class="grid">
+
+            <a href="fault.html" class="card">
+                <span class="icon">🔧</span>
+                <div class="name">故障记录</div>
+                <div class="desc">设备故障追踪管理</div>
+            </a>
+
+            <a href="solder.html" class="card">
+                <span class="icon">⚡</span>
+                <div class="name">焊锡统计</div>
+                <div class="desc">生产质量数据统计</div>
+            </a>
+
+            <a href="diary.html" class="card">
+                <span class="icon">📖</span>
+                <div class="name">心得记事</div>
+                <div class="desc">每日随笔记录</div>
+            </a>
+
+            <a href="ledger.html" class="card">
+                <span class="icon">📒</span>
+                <div class="name">记账本</div>
+                <div class="desc">收支流水管理</div>
+            </a>
+
+        </div>
+        <div class="footer">💾 数据保存在浏览器本地 · 支持备份恢复</div>
+    </div>
+</body>
+</html>
